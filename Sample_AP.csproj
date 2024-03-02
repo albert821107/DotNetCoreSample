@@ -10,12 +10,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Folder Include="DataBase\" />
+		<Folder Include="Model\" />
+		<Folder Include="Docker-Compose\" />
 		<Folder Include="Script_Tool\" />
 	</ItemGroup>
 
