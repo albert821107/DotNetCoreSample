@@ -17,7 +17,6 @@
 
 	<ItemGroup>
 		<Folder Include="DataBase\" />
-		<Folder Include="Model\" />
 		<Folder Include="Docker-Compose\" />
 		<Folder Include="Script_Tool\" />
 	</ItemGroup>

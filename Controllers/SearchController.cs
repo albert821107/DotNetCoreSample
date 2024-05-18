@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using OrganizationSample;
 using System.Globalization;
 
-namespace OrganizationSample.Controllers;
+namespace Sample_AP.Controllers;
 
 [ApiController]
 [Route("api/")]
