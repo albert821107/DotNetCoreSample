@@ -1,6 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Sample_AP.Model;
+using System.Diagnostics.Metrics;
+using System.Drawing;
+using System.Linq;
+using System.Net;
+using System.Numerics;
 
 namespace Sample_AP.Controllers;
 
@@ -9,10 +14,10 @@ namespace Sample_AP.Controllers;
 public class UserController : ControllerBase
 {
     // 連線字串
-    private readonly string _connectionString = "data source=.;initial catalog=Northwind;persist security info=True;Trusted_Connection=True;TrustServerCertificate=true;";
+    private readonly string _connectionString = "data source=FINAL898Y\\SQLEXPRESS;initial catalog=Northwind;persist security info=True;Trusted_Connection=True;TrustServerCertificate=true;";
 
     public UserController() { }
-
+    private List<Customer> resultall;
     [HttpGet]
     [Route("user/{customerID}")]
     public IActionResult GetUserByID(string customerID)
@@ -31,7 +36,6 @@ public class UserController : ControllerBase
             {
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
-                    var aaa = reader;
 
                     if (reader.Read())
                     {
@@ -58,12 +62,44 @@ public class UserController : ControllerBase
     [Route("user")]
     public IActionResult GetAllUsers()
     {
-        List<Customer> result = new List<Customer>();
+        
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+            connection.Open();
 
+            string sql = @$"SELECT TOP 20 *
+                            FROM Customers ORDER BY CustomerID";
+            List<Customer> resultall = new List<Customer>();
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    int i = 0;  
+                    while (reader.Read())
+                    {
+                        Customer newcustomer = new Customer
+                        {
+                            CustomerID = reader["CustomerID"].ToString(),
+                            CompanyName = reader["CompanyName"].ToString(),
+                            ContactName = reader["ContactName"].ToString(),
+                            ContactTitle = reader["ContactTitle"].ToString(),
+                            Address = reader["Address"].ToString(),
+                            City = reader["City"].ToString(),
+                            Region = reader["Region"].ToString(),
+                            PostalCode = reader["PostalCode"].ToString(),
+                            Country = reader["Country"].ToString(),
+                            Phone = reader["Phone"].ToString(),
+                            Fax = reader["Fax"].ToString(),
+                        };
+                        resultall.Add(newcustomer);
+                        i++;
+                    }
+                    reader.Close();
+                }
+            }
 
-        //todo
-
-        return Ok(result);
+            return Ok(resultall);
+        }
     }
 
     [HttpPut]
