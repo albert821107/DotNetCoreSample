@@ -14,10 +14,10 @@ namespace Sample_AP.Controllers;
 public class UserController : ControllerBase
 {
     // 連線字串
-    private readonly string _connectionString = "data source=FINAL898Y\\SQLEXPRESS;initial catalog=Northwind;persist security info=True;Trusted_Connection=True;TrustServerCertificate=true;";
+    private readonly string _connectionString = "data source=.;initial catalog=Northwind;persist security info=True;Trusted_Connection=True;TrustServerCertificate=true;";
 
     public UserController() { }
-    private List<Customer> resultall;
+
     [HttpGet]
     [Route("user/{customerID}")]
     public IActionResult GetUserByID(string customerID)
@@ -58,23 +58,24 @@ public class UserController : ControllerBase
         }
     }
 
+    // Memo 說明建構式
     [HttpGet]
     [Route("user")]
     public IActionResult GetAllUsers()
     {
-        
         using (SqlConnection connection = new SqlConnection(_connectionString))
         {
             connection.Open();
 
             string sql = @$"SELECT TOP 20 *
                             FROM Customers ORDER BY CustomerID";
-            List<Customer> resultall = new List<Customer>();
+
+            List<Customer> result = new List<Customer>();
+
             using (SqlCommand command = new SqlCommand(sql, connection))
             {
                 using (SqlDataReader reader = command.ExecuteReader())
                 {
-                    int i = 0;  
                     while (reader.Read())
                     {
                         Customer newcustomer = new Customer
@@ -91,20 +92,21 @@ public class UserController : ControllerBase
                             Phone = reader["Phone"].ToString(),
                             Fax = reader["Fax"].ToString(),
                         };
-                        resultall.Add(newcustomer);
-                        i++;
+
+                        result.Add(newcustomer);
                     }
+
                     reader.Close();
                 }
             }
 
-            return Ok(resultall);
+            return Ok(result);
         }
     }
 
     [HttpPut]
     [Route("user")]
-    public IActionResult UpdateUserName(string contactName)
+    public IActionResult UpdateUserName(string customerID, string contactName)
     {
         bool result = false;
 
