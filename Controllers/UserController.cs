@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.Data.SqlClient;
 using Sample_AP.Model;
 using System.Diagnostics.Metrics;
@@ -6,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Numerics;
+using System.Reflection.PortableExecutable;
 
 namespace Sample_AP.Controllers;
 
@@ -68,7 +70,7 @@ public class UserController : ControllerBase
             connection.Open();
 
             string sql = @$"SELECT TOP 20 *
-                            FROM Customers ORDER BY CustomerID";
+                            FROM Customers";
 
             List<Customer> result = new List<Customer>();
 
@@ -106,12 +108,23 @@ public class UserController : ControllerBase
 
     [HttpPut]
     [Route("user")]
-    public IActionResult UpdateUserName(string customerID, string contactName)
+    public void UpdateUserName(string customerID, string contactName)
     {
-        bool result = false;
+        
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+            
+            connection.Open();
 
-        //todo
+            string sql = @$"UPDATE Customers
+                            SET ContactName = '{contactName}'
+                            WHERE CustomerID = '{customerID}'";
 
-        return Ok(result);
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
     }
 }
