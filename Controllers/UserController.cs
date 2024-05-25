@@ -70,7 +70,8 @@ public class UserController : ControllerBase
             connection.Open();
 
             string sql = @$"SELECT TOP 20 *
-                            FROM Customers";
+                            FROM Customers
+                            ORDER BY CustomerID";
 
             List<Customer> result = new List<Customer>();
 
@@ -126,5 +127,60 @@ public class UserController : ControllerBase
             }
         }
 
+    }
+    /*
+     * 
+DELETE od
+    FROM [Order Details] AS od
+    INNER JOIN Orders AS o
+        ON od.OrderID = o.OrderID
+    INNER JOIN Customers AS c
+        ON o.CustomerID = c.CustomerID
+    WHERE c.CustomerID = 'ALFKI'
+
+DELETE o
+    FROM Orders AS o
+    INNER JOIN Customers AS c
+        ON o.CustomerID = c.CustomerID
+    WHERE o.CustomerID = 'ALFKI'
+
+DELETE FROM Customers
+    WHERE CustomerID = 'ALFKI'
+     */
+    [HttpDelete]
+    [Route("user")]
+    public void Deletecustomer(string customerID)
+    {
+
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+
+            connection.Open();
+
+            string sql = @$"DELETE FROM Customers
+                            WHERE CustomerID = '{customerID}'";
+
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+
+    }
+    [HttpPost]
+    [Route("user")]
+    public void Postcustomer()
+    {
+        using (SqlConnection connection = new SqlConnection(_connectionString))
+        {
+            connection.Open();
+            string sql = @$"INSERT INTO Customers
+                            VALUES ('ALFK2','Alfreds Futterkiste','asdasd','Sales Representative','Obere Str. 57'
+                            ,'Berlin','','12209','Germany','030-0074321','030-0076545')";
+            using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    command.ExecuteNonQuery();
+                }         
+        }
     }
 }
