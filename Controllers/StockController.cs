@@ -22,6 +22,7 @@ public class StockController : ControllerBase
     public async Task<IActionResult> GetStockByID(string stockID)
     {
         string resultURL = $"https://mis.twse.com.tw/stock/api/getStockInfo.jsp?json=1&delay=0&ex_ch=tse_{stockID}.tw";
+        //https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_2330.tw&json=1&delay=0&_=1717942658851
 
         HttpResponseMessage response = await _httpClient.GetAsync(resultURL);
 
@@ -32,7 +33,6 @@ public class StockController : ControllerBase
         return Ok(responseBody);
     }
 
-    //0609範例
     [HttpGet]
     [Route("Stock/{stockTradeType}/{stockID}")]
     public async Task<IActionResult> GetStockByStockID(StockTradeType stockTradeType, string stockID)
@@ -51,4 +51,7 @@ public class StockController : ControllerBase
 
         return Ok(data);
     }
+
+    //查詢歷史股價
+    //需求:我要輸入股票代號和股票交易類型，就能得到近三個月或是半年的股價
 }
