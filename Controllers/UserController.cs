@@ -111,10 +111,10 @@ public class UserController : ControllerBase
     [Route("user")]
     public void UpdateUserName(string customerID, string contactName)
     {
-        
+
         using (SqlConnection connection = new SqlConnection(_connectionString))
         {
-            
+
             connection.Open();
 
             string sql = @$"UPDATE Customers
@@ -178,9 +178,19 @@ DELETE FROM Customers
                             VALUES ('ALFK2','Alfreds Futterkiste','asdasd','Sales Representative','Obere Str. 57'
                             ,'Berlin','','12209','Germany','030-0074321','030-0076545')";
             using (SqlCommand command = new SqlCommand(sql, connection))
-                {
-                    command.ExecuteNonQuery();
-                }         
+            {
+                command.ExecuteNonQuery();
+            }
         }
+    }
+
+    [HttpPost]
+    [Route("user/register")]
+    public IActionResult Register(string account, string password)
+    {
+        //TODO 帳號註冊處理
+
+
+        return Ok($"註冊成功，帳號:{account}");
     }
 }

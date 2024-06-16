@@ -47,7 +47,7 @@ public class StockController : ControllerBase
 
         string responseBody = await response.Content.ReadAsStringAsync();
 
-        var data = JsonSerializer.Deserialize<StockResponse>(responseBody);
+        var data = JsonSerializer.Deserialize<StockResponse>(responseBody);//DataModel <=> DomainModel <=> ViewModel
 
         return Ok(data);
     }
@@ -90,6 +90,7 @@ public class StockController : ControllerBase
             data[i] = JsonSerializer.Deserialize<MonthStockData>(await response.Content.ReadAsStringAsync());
             result.AddRange(data[i].Data.Where(item => item[0].Contains("113/")).ToList());
         }
+
         return Ok(result);
     }
 }
