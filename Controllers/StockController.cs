@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Extensions;
 using Sample_AP.Model;
 using Sample_AP.Model.Enum;
@@ -15,22 +16,6 @@ public class StockController : ControllerBase
     public StockController(HttpClient httpClient)
     {
         _httpClient = httpClient;
-    }
-
-    [HttpGet]
-    [Route("Stock/{stockID}")]
-    public async Task<IActionResult> GetStockByID(string stockID)
-    {
-        string resultURL = $"https://mis.twse.com.tw/stock/api/getStockInfo.jsp?json=1&delay=0&ex_ch=tse_{stockID}.tw";
-        //https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_2330.tw&json=1&delay=0&_=1717942658851
-
-        HttpResponseMessage response = await _httpClient.GetAsync(resultURL);
-
-        response.EnsureSuccessStatusCode();
-
-        string responseBody = await response.Content.ReadAsStringAsync();
-
-        return Ok(responseBody);
     }
 
     [HttpGet]
@@ -64,13 +49,13 @@ public class StockController : ControllerBase
         switch (nowMonth)
         {
             case 1:
-                SelectDate = [(nowYear - 2).ToString() + "11", (nowYear - 1).ToString() + "12", nowYear.ToString()+"01" ];
+                SelectDate = [(nowYear - 2).ToString() + "11", (nowYear - 1).ToString() + "12", nowYear.ToString() + "01"];
                 break;
             case 2:
                 SelectDate = [(nowYear - 1).ToString() + "12", nowYear.ToString() + "01", nowYear.ToString() + "02"];
                 break;
             default:
-                SelectDate = [(nowYear).ToString() +"0"+ (nowMonth - 2).ToString(), (nowYear).ToString() + "0" + (nowMonth - 1).ToString(), (nowYear).ToString() + "0" + nowMonth.ToString()];
+                SelectDate = [(nowYear).ToString() + "0" + (nowMonth - 2).ToString(), (nowYear).ToString() + "0" + (nowMonth - 1).ToString(), (nowYear).ToString() + "0" + nowMonth.ToString()];
                 break;
         }
         //string resultURL = $"https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_AVG?date=2024{month}01&stockNo={stockID}&response=json";
@@ -78,7 +63,7 @@ public class StockController : ControllerBase
         //string[] responseBody =new string[month.Length];
         MonthStockData[] data = new MonthStockData[SelectDate.Length];
         List<List<string>> result = new List<List<string>>();
-        for (int i =0;i< SelectDate.Length; i++)
+        for (int i = 0; i < SelectDate.Length; i++)
         {
             month_reslutURL[i] = $"https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_AVG?date={SelectDate[i]}01&stockNo={stockID}&response=json";
             HttpResponseMessage response = await _httpClient.GetAsync(month_reslutURL[i]);
@@ -92,5 +77,57 @@ public class StockController : ControllerBase
         }
 
         return Ok(result);
+    }
+
+    [HttpPost]
+    [Route("Stock/ExportStockExcel/{stockID}")]
+    public async Task<IActionResult> ExportStockExcel(string stockID)
+    {
+        List<DateTime> dates = new List<DateTime>();//要加日期
+        List<decimal> prices = new List<decimal> { 123, 124, 126, 123, 124, 126, 123, 124, 126, 123, 124, 126, 127, 129, 130 };
+        decimal avg = 125;
+
+
+        // 步驟一 
+
+
+        decimal a = 1;//假設(需要計算)
+        List<decimal> pricesA = new List<decimal> { avg + a, avg + a, avg + a, avg + a, avg + a };//後面壓上去
+        List<decimal> pricesB = new List<decimal> { avg - a, avg - a, avg - a, avg - a, avg - a };//後面壓上去
+
+        // 步驟二 輸入價格和時間就自己整理成excel
+        string result = CreateExcel(dates, prices);
+
+        return Ok(result);
+    }
+
+    //TODO 計算標準差
+    private decimal CalcStandardDeviation (List<decimal> prices )
+    {
+        return 1;
+    }
+
+    private string CreateExcel(List<DateTime> dates, List<decimal> prices)
+    {
+        // 創建一個新的工作簿
+        var workbook = new XLWorkbook();
+
+        // 添加工作表
+        var worksheet = workbook.Worksheets.Add("布林");
+
+        // 寫入數據
+        worksheet.Cell("A1").Value = "日期";
+        worksheet.Cell("B1").Value = "股價";
+
+        for (int i = 0; i < prices.Count; i++)
+        {
+            worksheet.Cell($"A{i + 2}").Value = DateTime.Now;
+            worksheet.Cell($"B{i + 2}").Value = prices[i];
+        }
+
+        // 保存文件
+        workbook.SaveAs("Stock.xlsx");
+
+        return "下載成功";
     }
 }
