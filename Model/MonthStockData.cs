@@ -17,7 +17,7 @@ namespace Sample_AP.Model
         public List<string> Fields { get; set; }
 
         [JsonPropertyName("data")]
-        public List<List<string>> Data { get; set; }
+        public List<string[]> Data { get; set; }
 
         [JsonPropertyName("notes")]
         public List<string> Notes { get; set; }
@@ -27,7 +27,7 @@ namespace Sample_AP.Model
     }
     public class DateStockPrice
     {
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
         public decimal StockPrice { get; set; }
     }
 }

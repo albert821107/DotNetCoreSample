@@ -2,6 +2,7 @@
 using Microsoft.OpenApi.Extensions;
 using Sample_AP.Model;
 using Sample_AP.Model.Enum;
+using System.Collections.Generic;
 using System.Text.Json;
 
 namespace Sample_AP.Controllers;
@@ -73,11 +74,9 @@ public class StockController : ControllerBase
                 SelectDate = [(nowYear).ToString() +"0"+ (nowMonth - 2).ToString(), (nowYear).ToString() + "0" + (nowMonth - 1).ToString(), (nowYear).ToString() + "0" + nowMonth.ToString()];
                 break;
         }
-        //string resultURL = $"https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_AVG?date=2024{month}01&stockNo={stockID}&response=json";
         string[] month_reslutURL = new string[SelectDate.Length];
-        //string[] responseBody =new string[month.Length];
         MonthStockData[] data = new MonthStockData[SelectDate.Length];
-        List<List<string>> result = new List<List<string>>();
+        List<string[]> result = new List<string[]>();
         for (int i =0;i< SelectDate.Length; i++)
         {
             month_reslutURL[i] = $"https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_AVG?date={SelectDate[i]}01&stockNo={stockID}&response=json";
@@ -88,8 +87,26 @@ public class StockController : ControllerBase
             //responseBody[i] = await response.Content.ReadAsStringAsync();
 
             data[i] = JsonSerializer.Deserialize<MonthStockData>(await response.Content.ReadAsStringAsync());
-            result.AddRange(data[i].Data.Where(item => item[0].Contains("113/")).ToList());
+            result.AddRange(data[i].Data.Where(item => item[0].Contains("113/")));
         }
-        return Ok(result);
+        List<DateStockPrice> _dateStockPrice = new List<DateStockPrice>();
+        foreach (string[] s in result)
+        {
+            DateStockPrice dateStockPrice = new DateStockPrice();
+            DateTime dateValue;
+            decimal priceValue;
+            if (DateTime.TryParse(s[0], out dateValue)& decimal.TryParse(s[1], out priceValue))
+            {
+                dateStockPrice.Date = dateValue;
+                dateStockPrice.StockPrice = priceValue;
+            }
+            else 
+            {
+                
+            }
+            _dateStockPrice.Add(dateStockPrice);
+        }
+            
+        return Ok(_dateStockPrice);
     }
 }
