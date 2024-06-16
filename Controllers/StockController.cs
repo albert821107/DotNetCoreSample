@@ -54,4 +54,42 @@ public class StockController : ControllerBase
 
     //查詢歷史股價
     //需求:我要輸入股票代號和股票交易類型，就能得到近三個月或是半年的股價
+    [HttpGet]
+    [Route("Stock_PastThreeMonthDate/{stockID}")]
+    public async Task<IActionResult> GetStock_PastThreeMonthDate_ByStockID(string stockID)
+    {
+        int nowYear = DateTime.Now.Year;
+        int nowMonth = DateTime.Now.Month;
+        string[] SelectDate = new string[3];
+        switch (nowMonth)
+        {
+            case 1:
+                SelectDate = [(nowYear - 2).ToString() + "11", (nowYear - 1).ToString() + "12", nowYear.ToString()+"01" ];
+                break;
+            case 2:
+                SelectDate = [(nowYear - 1).ToString() + "12", nowYear.ToString() + "01", nowYear.ToString() + "02"];
+                break;
+            default:
+                SelectDate = [(nowYear).ToString() +"0"+ (nowMonth - 2).ToString(), (nowYear).ToString() + "0" + (nowMonth - 1).ToString(), (nowYear).ToString() + "0" + nowMonth.ToString()];
+                break;
+        }
+        //string resultURL = $"https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_AVG?date=2024{month}01&stockNo={stockID}&response=json";
+        string[] month_reslutURL = new string[SelectDate.Length];
+        //string[] responseBody =new string[month.Length];
+        MonthStockData[] data = new MonthStockData[SelectDate.Length];
+        List<List<string>> result = new List<List<string>>();
+        for (int i =0;i< SelectDate.Length; i++)
+        {
+            month_reslutURL[i] = $"https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_AVG?date={SelectDate[i]}01&stockNo={stockID}&response=json";
+            HttpResponseMessage response = await _httpClient.GetAsync(month_reslutURL[i]);
+
+            response.EnsureSuccessStatusCode();
+
+            //responseBody[i] = await response.Content.ReadAsStringAsync();
+
+            data[i] = JsonSerializer.Deserialize<MonthStockData>(await response.Content.ReadAsStringAsync());
+            result.AddRange(data[i].Data.Where(item => item[0].Contains("113/")).ToList());
+        }
+        return Ok(result);
+    }
 }
