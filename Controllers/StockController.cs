@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 
 namespace Sample_AP.Controllers;
-
+//TODO 紅狗 架構拆分 (命名規則)
 [ApiController]
 [Route("api/")]
 public class StockController : ControllerBase
